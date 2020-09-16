@@ -1,0 +1,43 @@
+{
+  "name": "asfaltapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "import-data.js",
+  "scripts": {
+    "dev": "nodemon --exec babel-node ./src/index.js",
+    "start": "mode=PRODUCTION babel-node ./src/index.js",
+    "test": "NODE_ENV=test ./node_modules/.bin/mocha --require @babel/register --recursive './test/**/*.spec.js'",
+    "debug": "node --inspect-brk ./dist/index.js",
+    "build": "babel src --out-dir ./dist --source-maps",
+    "test-watch": "NODE_ENV=test nodemon --watch test --exec './node_modules/.bin/mocha --require @babel/register --recursive './test/**/*.spec.js''",
+    "import-data": "babel-node ./src/import-data.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codemasternode/asfalt-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/codemasternode/asfalt-api/issues"
+  },
+  "homepage": "https://github.com/codemasternode/asfalt-api#readme",
+  "dependencies": {
+    "@babel/cli": "^7.11.6",
+    "@babel/core": "^7.11.6",
+    "@babel/node": "^7.10.5",
+    "@babel/polyfill": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/register": "^7.11.5",
+    "geojson-stream": "^0.1.0",
+    "mapnik": "^4.5.2",
+    "mongoose": "^5.10.5",
+    "node-dbf": "^0.4.0",
+    "node-osm-stream": "^0.2.2",
+    "nodemon": "^2.0.4",
+    "osm-read": "^0.7.0",
+    "shapefile": "^0.6.6",
+    "shpjs": "^3.5.0"
+  }
+}
