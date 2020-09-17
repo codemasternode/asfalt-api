@@ -31,6 +31,8 @@ mongoose.connect("mongodb://localhost:27017/roads", dbOptions, (err) => {
             osmId: result.value.properties.osm_id,
             lat: result.value.geometry.coordinates[i][1],
             lng: result.value.geometry.coordinates[i][0],
+            name: result.value.properties.name,
+            fclass: result.value.properties.fclass
           });
         }
 
@@ -46,44 +48,21 @@ mongoose.connect("mongodb://localhost:27017/roads", dbOptions, (err) => {
         const isLastItem = i === roads.length - 1;
         // every 100 items, insert into the database
         if (i % 100 === 0 || isLastItem) {
-          await Road.insertMany(toInsert);
+          await Road.create(toInsert);
           toInsert = [];
         }
       }
-      const landuses = [];
-      shapefile
-        .open(filePathToLanduseShp, filePathToLanduseDbf, { encoding: "UTF-8" })
-        .then((source) =>
-          source.read().then(function log(result) {
-            if (result.done) return;
-            landuses.push(result.value);
-            return source.read().then(log);
-          })
-        )
-        .catch((error) => console.error(error.stack))
-        .finally(async () => {
-          console.log(landuses.length);
-          let toInsert = [];
-          for (let i = 0; i < landuses.length; i++) {
-            toInsert.push(landuses[i]);
-            const isLastItem = i === landuses.length - 1;
-            // every 100 items, insert into the database
-            if (i % 100 === 0 || isLastItem) {
-              await Landuse.insertMany(toInsert);
-              toInsert = [];
-            }
-          }
+      toInsert = [];
+      for (let i = 0; i < points.length; i++) {
+        toInsert.push(points[i]);
+        const isLastItem = i === points.length - 1;
+        // every 100 items, insert into the database
+        if (i % 100 === 0 || isLastItem) {
+          await Point.create(toInsert);
           toInsert = [];
-          for (let i = 0; i < points.length; i++) {
-            toInsert.push(points[i]);
-            const isLastItem = i === points.length - 1;
-            // every 100 items, insert into the database
-            if (i % 100 === 0 || isLastItem) {
-              await Point.insertMany(toInsert);
-              toInsert = [];
-            }
-          }
-          mongoose.connection.close();
-        });
+        }
+      }
+
+      mongoose.connection.close();
     });
 });

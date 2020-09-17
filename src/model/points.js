@@ -14,6 +14,14 @@ const PointSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    fclass: {
+      type: String,
+      default: null
+    },
+    name: {
+      type: String,
+      default: null
+    }
   },
   { strict: true }
 );
