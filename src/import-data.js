@@ -3,6 +3,7 @@ import Parser from "node-dbf";
 import mongoose from "mongoose";
 import Road from "./model/road";
 import Landuse from "./model/landuse";
+import Point from "./model/points";
 
 const filePathToRoadShp = "./data/Poland/malapolskie/road.shp";
 const filePathToRoadDbf = "./data/Poland/malapolskie/road.dbf";
@@ -16,6 +17,7 @@ const dbOptions = {
   useCreateIndex: true,
 };
 mongoose.promise = global.promise;
+const points = [];
 mongoose.connect("mongodb://localhost:27017/roads", dbOptions, (err) => {
   const roads = [];
   shapefile
@@ -24,6 +26,14 @@ mongoose.connect("mongodb://localhost:27017/roads", dbOptions, (err) => {
       source.read().then(function log(result) {
         if (result.done) return;
         roads.push(result.value);
+        for (let i = 0; i < result.value.geometry.coordinates.length; i++) {
+          points.push({
+            osmId: result.value.properties.osm_id,
+            lat: result.value.geometry.coordinates[i][1],
+            lng: result.value.geometry.coordinates[i][0],
+          });
+        }
+
         return source.read().then(log);
       })
     )
@@ -60,6 +70,16 @@ mongoose.connect("mongodb://localhost:27017/roads", dbOptions, (err) => {
             // every 100 items, insert into the database
             if (i % 100 === 0 || isLastItem) {
               await Landuse.insertMany(toInsert);
+              toInsert = [];
+            }
+          }
+          toInsert = [];
+          for (let i = 0; i < points.length; i++) {
+            toInsert.push(points[i]);
+            const isLastItem = i === points.length - 1;
+            // every 100 items, insert into the database
+            if (i % 100 === 0 || isLastItem) {
+              await Point.insertMany(toInsert);
               toInsert = [];
             }
           }

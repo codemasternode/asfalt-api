@@ -1,4 +1,4 @@
-import { bearing, toDegrees, toRadians } from "./bearing";
+import { bearing } from "./bearing";
 import { Client } from "@googlemaps/google-maps-services-js";
 import "dotenv/config";
 import axios from "axios";
@@ -7,21 +7,24 @@ import path from "path";
 
 //longitude, latitude
 const points = [
-  [20.4132983, 49.4264564],
-  [20.4143716, 49.4272136],
-  [20.4153793, 49.4277218],
-  [20.4157706, 49.4277918],
-  [20.4158422, 49.4278046],
-  [20.4163634, 49.4278978],
+  [19.8020216, 50.0856686],
+  [19.8025729, 50.085785],
+  [19.8030318, 50.0859327],
+  [19.8033258, 50.0860198],
+  [19.8035147, 50.0860689],
+  [19.8037026, 50.0861009],
+  [19.8039351, 50.0861341],
+  [19.8041411, 50.086152],
 ];
 
 const downloadArray = [];
 
-for (let i = 0; i < points.length; i++) {
+for (let i = 0; i < points.length - 1; i++) {
   downloadArray.push(
     fileDownload(
       { lat: points[i][1], lng: points[i][0] },
-      `./data/Poland/malapolskie/photos/point${i}.jpeg`
+      `./data/Poland/malapolskie/photos/point${i}.jpeg`,
+      bearing(points[i][1], points[i][0], points[i + 1][1], points[i + 1][0])
     )
   );
 }
@@ -30,11 +33,11 @@ Promise.all(downloadArray).then(() => {
   console.log("Udało się !!!");
 });
 
-function fileDownload({ lat, lng }, location) {
+function fileDownload({ lat, lng }, location, heading) {
   return new Promise((resolve, reject) => {
     const writer = fs.createWriteStream(location);
     axios({
-      url: `https://maps.googleapis.com/maps/api/streetview?key=${process.env.GOOGLE_MAPS_API_KEY}&size=1200x900&location=${lat},${lng}&heading=300`,
+      url: `https://maps.googleapis.com/maps/api/streetview?key=${process.env.GOOGLE_MAPS_API_KEY}&size=1200x900&location=${lat},${lng}&heading=${heading}`,
       responseType: "stream",
     })
       .then((response) => {
