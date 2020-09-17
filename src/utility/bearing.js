@@ -1,13 +1,13 @@
-function toRadians(degrees) {
+export function toRadians(degrees) {
   return (degrees * Math.PI) / 180;
 }
 
 // Converts from radians to degrees.
-function toDegrees(radians) {
+export function toDegrees(radians) {
   return (radians * 180) / Math.PI;
 }
 
-function bearing(startLat, startLng, destLat, destLng) {
+export function bearing(startLat, startLng, destLat, destLng) {
   startLat = toRadians(startLat);
   startLng = toRadians(startLng);
   destLat = toRadians(destLat);
