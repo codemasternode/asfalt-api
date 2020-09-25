@@ -1,5 +1,5 @@
 import express from "express";
-import Point from '../model/points'
+import Way from '../model/way'
 import dbConnect from '../config/db'
 import "dotenv/config"
 
@@ -7,18 +7,29 @@ const app = express();
 dbConnect("mongodb://localhost:27017/roads")
 
 app.get("/", (req, res) => {
-  Point.aggregate([
+  Way.aggregate([
     {
       $match: {
-        "fclass": {
-          $eq: "primary"
+        "tags.name": {
+          $eq: "Skotnicka"
         }
       }
     }
   ]).then((data) => {
     let markersScript = ""
     for (let i = 0; i < data.length; i++) {
-      markersScript += `var marker${i} = new google.maps.Marker({position: {lat: ${data[i].lat}, lng: ${data[i].lng}}, map: map});`
+      for(let k = 0; k < data[i].nodeRefs.length; k++) {
+        markersScript += `
+        var infowindow${i}${k} = new google.maps.InfoWindow({
+          content: "<span>${data[i]._id}</span><br><span>${data[i].nodeRefs[k].lat}</span><br><span>${data[i].nodeRefs[k].lon}</span>"
+        });
+        var marker${i}${k} = new google.maps.Marker({position: {lat: ${data[i].nodeRefs[k].lat}, lng: ${data[i].nodeRefs[k].lon}}, map: map, title: '${data[i]._id}'});
+        google.maps.event.addListener(marker${i}${k}, 'click', function() {
+          infowindow${i}${k}.open(map,marker${i}${k});
+        });
+        `
+      }
+     
     }
     res.set("Content-Type", "text/html");
     res.send(new Buffer(`
@@ -57,7 +68,9 @@ app.get("/", (req, res) => {
                 },
                 zoom: 10
               });
+              
               ${markersScript}
+              
             }
             
           </script>
